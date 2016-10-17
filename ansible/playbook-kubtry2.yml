@@ -59,7 +59,7 @@
       # Enable and restart required sercvices for master : etcd, kube-apiserver, kube-controller-manager kube-scheduler
       # TODO: Make a flag - do not execute if anyvalues above did not change
     - name: enable service for kubernetes master
-      service: name={{item}} state=restarted
+      service: name={{item}} state=started
       with_items:
         - etcd
         - kube-apiserver
@@ -112,10 +112,18 @@
 
       # Enable and restart required sercvices for master : etcd, kube-apiserver, kube-controller-manager kube-scheduler
       # TODO: Make a flag - do not execute if anyvalues above did not change
-    - name: enable service for kubernetes master
-      service: name={{item}} state=restarted
-      with_items:
-        - kube-proxy
-        - kubelet
-        - docker
-        - flanneld
+    # - name: enable service for kubernetes master
+    #   service: name={{item}} state=restarted
+    #   with_items:
+    #     - kube-proxy
+    #     - kubelet
+    #     - docker
+    #     - flanneld
+    - name: enable service kube-proxy
+      service: name=kube-proxy state=started
+    - name: enable service kubelet
+      service: name=kubelet state=started
+    - name: enable service docker
+      service: name=docker state=started
+    - name: enable service flanneld
+      service: name=flanneld state=started
