@@ -7,8 +7,6 @@
   hosts: all
   gather_facts: True
   tasks:
-  - debug: var=ansible_distribution
-  - debug: var=ansible_all_ipv4_addresses[0]
   - set_fact: my_ip={{ ansible_all_ipv4_addresses[0] }}
   - debug: var=my_ip
 
@@ -53,6 +51,10 @@
       ini_file: dest=/etc/kubernetes/apiserver section='' option=KUBE_ADMISSION_CONTROL value="--admission_control=NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ResourceQuota"
     - name: set kubernetes values KUBE_API_ARGS
       ini_file: dest=/etc/kubernetes/apiserver section='' option=KUBE_API_ARGS value=""
+
+    # Counter a bug: create the kuberneteis runtime directory with proper permissions
+    - name: Create kubernetes runtime directory
+      file: path=/var/run/kubernetes group=kube owner=kube state=directory
 
       # Enable and restart required sercvices for master : etcd, kube-apiserver, kube-controller-manager kube-scheduler
       # TODO: Make a flag - do not execute if anyvalues above did not change
