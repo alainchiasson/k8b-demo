@@ -9,9 +9,57 @@
     - name: dissable and shutdown firewalld (just in case)
       service: name=firewalld enabled=false state=stopped
     - name: install ntp package
-      package: name=ntp
+      package: name=ntp state=present
     - name: enable ntpd service and turn it on
       service: name=ntpd enabled=true state=started
+    - name: install etcd and kubernetes packages
+      package: name=etcd,kubernetes state=present
+
+    # Set etcd config values. There is no INI sction for now.
+    # This section shoul be moved to a submodule or play
+    - name: Set values for ETCD_NAME in etcd ini file
+      ini_file: dest=/etc/etcd/etcd.conf section='' option=ETCD_NAME value=default
+    - name: Set values for ETCD_DATA_DIR in etcd ini file
+      ini_file: dest=/etc/etcd/etcd.conf section='' option=ETCD_DATA_DIR value=/var/lib/etcd/default.etcd
+    - name: Set values for ETCD_LISTEN_CLIENT_URLS in etcd ini file
+      ini_file: dest=/etc/etcd/etcd.conf section='' option=ETCD_LISTEN_CLIENT_URLS value=http://0.0.0.0:2379
+    - name: Set values for ETCD_ADVERTISE_CLIENT_URLS in etcd ini file
+      ini_file: dest=/etc/etcd/etcd.conf section='' option=ETCD_ADVERTISE_CLIENT_URLS value=http://localhost:2379
+
+    # Set kubernetes config values. There is no INI sction for now.
+    # This section shoul be moved to a submodule or play
+    - name: set kubernetes values KUBE_API_ADDRESS
+      ini_file: dest=/etc/kubernetes/apiserver section='' option=KUBE_API_ADDRESS value="--address=0.0.0.0"
+    - name: set kubernetes values KUBE_API_PORT
+      ini_file: dest=/etc/kubernetes/apiserver section='' option=KUBE_API_PORT value="--port=8080"
+    - name: set kubernetes values KUBELET_PORT
+      ini_file: dest=/etc/kubernetes/apiserver section='' option=KUBELET_PORT value="--kubelet_port=10250"
+    - name: set kubernetes values KUBE_ETCD_SERVERS
+      ini_file: dest=/etc/kubernetes/apiserver section='' option=KUBE_ETCD_SERVERS value="--etcd_servers=http://127.0.0.1:2379"
+    - name: set kubernetes values KUBE_SERVICE_ADDRESSES
+      ini_file: dest=/etc/kubernetes/apiserver section='' option=KUBE_SERVICE_ADDRESSES value="--service-cluster-ip-range=10.254.0.0/16"
+    - name: set kubernetes values KUBE_ADMISSION_CONTROL
+      ini_file: dest=/etc/kubernetes/apiserver section='' option=KUBE_ADMISSION_CONTROL value="--admission_control=NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ResourceQuota"
+    - name: set kubernetes values KUBE_API_ARGS
+      ini_file: dest=/etc/kubernetes/apiserver section='' option=KUBE_API_ARGS value=""
+
+      # Enable and restart required sercvices for master : etcd, kube-apiserver, kube-controller-manager kube-scheduler
+      # TODO: Make a flag - do not execute if anyvalues above did not change
+    - name: enable service for kubernetes master
+      service: name={{item}} state=restarted
+      with_items:
+        - etcd
+        - kube-apiserver
+        - kube-controller-manager
+        - kube-scheduler
+
+    # Set a value in etcd for flannel. This should be moved to a module.
+    # TODO: Make idempotent - possible in module.
+    - name: set flannel network config in etcd
+      shell: etcdctl mk /atomic.io/network/config '{"Network":"172.17.0.0/16"}'
+
+
+
 - hosts: minions
   remote_user: vagrant
   become: yes
@@ -20,6 +68,7 @@
     - name: dissable and shutdown firewalld (just in case)
       service: name=firewalld enabled=false state=stopped
     - name: install ntpd package
-      package: name=ntp
+      package: name=ntp state=present
     - name: enable ntpd service and turn it on
       service: name=ntpd enabled=true state=started
+      
