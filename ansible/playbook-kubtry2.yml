@@ -6,12 +6,20 @@
   become: yes
   become_method: sudo
   tasks:
-    - name: Place holder for master
-      shell: echo "Master node"
-- hosts: minion
+    - name: dissable and shutdown firewalld (just in case)
+      service: name=firewalld enabled=false state=stopped
+    - name: install ntp package
+      package: name=ntp
+    - name: enable ntpd service and turn it on
+      service: name=ntpd enabled=true state=started
+- hosts: minions
   remote_user: vagrant
   become: yes
   become_method: sudo
   tasks:
-    - name: Place holder for master
-      shell: echo "Minion node"
+    - name: dissable and shutdown firewalld (just in case)
+      service: name=firewalld enabled=false state=stopped
+    - name: install ntpd package
+      package: name=ntp
+    - name: enable ntpd service and turn it on
+      service: name=ntpd enabled=true state=started
