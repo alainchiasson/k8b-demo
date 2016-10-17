@@ -1,6 +1,17 @@
 ---
   # From http://severalnines.com/blog/installing-kubernetes-cluster-minions-centos7-manage-pods-services
   # Installing Kubernetes Cluster with 3 minions on CentOS 7 to manage pods and services
+
+  # To be run on all system - to setup some variables.
+- name: print out operating system
+  hosts: all
+  gather_facts: True
+  tasks:
+  - debug: var=ansible_distribution
+  - debug: var=ansible_all_ipv4_addresses[0]
+  - set_fact: my_ip={{ ansible_all_ipv4_addresses[0] }}
+  - debug: var=my_ip
+
 - hosts: master
   remote_user: vagrant
   become: yes
@@ -82,3 +93,27 @@
     # Add the location of the kubernetes master.
     - name: update kubernetes configuration
       ini_file: dest=/etc/kubernetes/config section='' option=KUBE_MASTER value="--master=http://192.168.33.10:8080"
+
+    #Define the configurations for the kublets
+    - name: set value of KUBELET_ADDRESS in kublet ini file
+      ini_file: dest=/etc/kubernetes/kubelet section='' option=KUBELET_ADDRESS value="--address=0.0.0.0"
+    - name: set value of KUBELET_PORT in kubelet ini file
+      ini_file: dest=/etc/kubernetes/kubelet section='' option=KUBELET_PORT value="--port=10250"
+    - name: set value of KUBELET_API_SERVER in kubelet ini file
+      ini_file: dest=/etc/kubernetes/kubelet section='' option=KUBELET_API_SERVER value="--api_servers=http://192.168.33.10:8080"
+    - name: set value of KUBELET_ARGS in kubelet ini file
+      ini_file: dest=/etc/kubernetes/kubelet section='' option=KUBELET_ARGS value=""
+      # change the hostname to this host’s IP address
+    - name: set value of KUBELET_HOSTNAME in kubelet ini file
+      ini_file: dest=/etc/kubernetes/kubelet section='' option=KUBELET_HOSTNAME value="--hostname_override={{ my_ip }}"
+
+
+      # Enable and restart required sercvices for master : etcd, kube-apiserver, kube-controller-manager kube-scheduler
+      # TODO: Make a flag - do not execute if anyvalues above did not change
+    - name: enable service for kubernetes master
+      service: name={{item}} state=restarted
+      with_items:
+        - kube-proxy
+        - kubelet
+        - docker
+        - flanneld
