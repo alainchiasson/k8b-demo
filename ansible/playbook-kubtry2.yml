@@ -1,0 +1,17 @@
+---
+  # From http://severalnines.com/blog/installing-kubernetes-cluster-minions-centos7-manage-pods-services
+  # Installing Kubernetes Cluster with 3 minions on CentOS 7 to manage pods and services
+- hosts: master
+  remote_user: vagrant
+  become: yes
+  become_method: sudo
+  tasks:
+    - name: Place holder for master
+      shell: echo "Master node"
+- hosts: minion
+  remote_user: vagrant
+  become: yes
+  become_method: sudo
+  tasks:
+    - name: Place holder for master
+      shell: echo "Minion node"
