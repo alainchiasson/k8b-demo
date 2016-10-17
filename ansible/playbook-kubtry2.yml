@@ -71,4 +71,14 @@
       package: name=ntp state=present
     - name: enable ntpd service and turn it on
       service: name=ntpd enabled=true state=started
-      
+
+    - name: install flannel and kubernetes packages
+      package: name=flannel,kubernetes state=present
+
+    # Add the location of the Flannel etcd source. Should be a dns name or somthing similar.
+    - name: update flannel configuration
+      ini_file: dest=/etc/sysconfig/flanneld section='' option=FLANNEL_ETCD value="http://192.168.33.10:2379"
+
+    # Add the location of the kubernetes master.
+    - name: update kubernetes configuration
+      ini_file: dest=/etc/kubernetes/config section='' option=KUBE_MASTER value="--master=http://192.168.33.10:8080"
