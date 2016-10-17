@@ -25,7 +25,7 @@ Vagrant.configure("2") do |config|
       master.vm.network "private_network", ip: "192.168.33.10"
       master.vm.hostname = "master"
       master.vm.provision "ansible" do |ansible|
-          ansible.playbook = "ansible/playbook-kubtry2.yml"
+          ansible.playbook = "ansible/playbook.yml"
           ansible.groups = ANSIBLE_GROUPS
       end
   end
@@ -35,7 +35,7 @@ Vagrant.configure("2") do |config|
       minion1.vm.network "private_network", ip: "192.168.33.11"
       minion1.vm.hostname = "minion1"
       minion1.vm.provision "ansible" do |ansible|
-          ansible.playbook = "ansible/playbook-kubtry2.yml"
+          ansible.playbook = "ansible/playbook.yml"
           ansible.groups = ANSIBLE_GROUPS
       end
   end
@@ -45,7 +45,7 @@ Vagrant.configure("2") do |config|
       minion2.vm.network "private_network", ip: "192.168.33.12"
       minion2.vm.hostname = "minion2"
       minion2.vm.provision "ansible" do |ansible|
-          ansible.playbook = "ansible/playbook-kubtry2.yml"
+          ansible.playbook = "ansible/playbook.yml"
           ansible.groups = ANSIBLE_GROUPS
       end
   end
@@ -55,7 +55,7 @@ Vagrant.configure("2") do |config|
       minion3.vm.network "private_network", ip: "192.168.33.13"
       minion3.vm.hostname = "minion3"
       minion3.vm.provision "ansible" do |ansible|
-          ansible.playbook = "ansible/playbook-kubtry2.yml"
+          ansible.playbook = "ansible/playbook.yml"
           ansible.groups = ANSIBLE_GROUPS
       end
   end
